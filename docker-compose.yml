@@ -1,0 +1,83 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "127.0.0.1:27018:27017"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    ports:
+      - "127.0.0.1:6381:6379"
+
+  processor:
+    build: ./python-worker
+    restart: unless-stopped
+    environment:
+      PROCESSING_API_URL: http://api:4000/api
+    expose:
+      - "8000"
+
+  api:
+    image: document-intelligence-backend:local
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/document_intelligence
+      REDIS_URL: redis://redis:6379
+      PROCESSOR_URL: http://processor:8000
+      UPLOAD_DIR: /data/uploads
+      FRONTEND_ORIGIN: http://localhost:8080
+    volumes:
+      - ./backend/uploads:/data/uploads
+    depends_on:
+      - mongo
+      - redis
+      - processor
+    expose:
+      - "4000"
+
+  queue-worker:
+    image: document-intelligence-backend:local
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["node", "dist/queue/worker.js"]
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/document_intelligence
+      REDIS_URL: redis://redis:6379
+      PROCESSOR_URL: http://processor:8000
+      UPLOAD_DIR: /data/uploads
+    volumes:
+      - ./backend/uploads:/data/uploads
+    depends_on:
+      - mongo
+      - redis
+      - processor
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  mongo-data:
+  redis-data:

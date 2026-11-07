@@ -11,6 +11,7 @@ import { documentQueue } from "../queue/queue";
 import { embedText, normalizeExtraction } from "../services/extraction";
 import { rankByCosine } from "../services/semantic-search";
 import { validateExtraction } from "../services/validation";
+import { Express } from 'express';
 
 const router = Router();
 const supportedExtensions = new Set([".pdf", ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".xlsx", ".xls", ".csv"]);

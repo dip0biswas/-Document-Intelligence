@@ -1,6 +1,6 @@
 # LedgerLens
 
-LedgerLens is a local-first invoice and document processing workspace. Upload PDFs, images, and spreadsheets; extract text with OCR; identify invoice fields with Gemini; review and correct results; and search documents by keyword or meaning.
+LedgerLens is a local-first invoice and document processing workspace. Upload PDFs, images, and spreadsheets; extract text with OCR; identify invoice fields with AA; review and correct results; and search documents by keyword or meaning.
 
 The default setup uses MongoDB 7 and Redis 7 in Docker. The API, queue worker, document processor, and web app can run in Docker or locally during development. Local semantic search uses Gemini embeddings stored in MongoDB and cosine similarity; MongoDB Atlas is not required.
 
